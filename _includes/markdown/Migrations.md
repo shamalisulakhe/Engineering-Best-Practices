@@ -1,10 +1,37 @@
 Data migrations are a necessary but often feared part of building applications on the web. Migrations can, and typically are, difficult, but if planned properly, they can be fairly painless. The following are some general guidelines to keep in mind when dealing with a migration. Note that this is not a how-to guide on doing a migration, since all migrations are unique, but these are some general guidelines to follow.
 
+## Migration Types
+
+At WisdmLabs, we often do following types of migration projects - 
+
+* *Migration of content from one site to another* 
+
+    * In such cases, the desired content can be migrated via XML, SQL scripts or custom scripts.
+
+* *Migration from an ECommerce platform to WooCommerce* 
+
+    * This can be Shopify to WooCommerce migration, Magento to WooCommerce migration, etc.
+    * Such types of migration includes migrating customer profiles, products, coupons, SKUs, orders, subscriptions, etc.
+    * We use following tools for such migrations - 
+        1. [LitExtension](https://litextension.com/) - A paid service for ECommerce platform migration.
+        2. [WooCommerce Subscriptions Importer and Exporter](https://github.com/woocommerce/woocommerce-subscriptions-importer-exporter) - For sites that include subscriptions.
+        3. Custom script depending of the entities to be migrated and their structure.
+
+* *Migration from an LMS to LearnDash* 
+
+    * This can be WP Courseware to LearnDash.
+    * Such types of migrations include migrating user profiles, courses and other LMS content, users' progress record, etc.
+    * We often use custom scripts for these migrations.
+
+* *Others*
+
+    * Apart from the above, there are some other migrations. For instance, MemberPress to LearnDash groups, MemberPress to WooCommerce Memberships.
+
 ## Migration Plan
 
 The first step in any migration project is to document a detailed plan. A typical migration plan is expected to outline:
 
-* How the content and data will be “pulled” out of the originating site (direct database connection, XML or WXR export, flat files such as SQL scripts, scraper, etc.). For many migrations, a SQL dump is used to move the data to a migration server where we can more easily handle it;
+* How the content and data will be “pulled” out of the originating site (direct database connection, XML, CSV export, etc.). For many migrations, a SQL dump is used to move the data to a migration server where we can more easily handle it;
 * Scripting requirements. Many migrations need [WP-CLI](https://wp-cli.org/) scripts for mapping data;
 * How long the migration is expected to run;
 * How the data and content will be mapped to the new site’s information architecture;
@@ -15,7 +42,7 @@ The first step in any migration project is to document a detailed plan. A typica
 * Making changes to data structure can influence site SEO. Proper redirects mitigate most of this, but this should be thoroughly accounted for in the plan;
 * How will backups be restored. How will a failed migration be handled.
 
-Make sure to have the plan peer reviewed by *at least* one other engineer.
+Make sure to have the plan peer reviewed by *at least* one other developer/SME.
 
 ## Writing Migration Scripts
 
@@ -29,9 +56,9 @@ The following are some general things to keep in mind when doing these migration
 
 * *Test all migration scripts*
 
-	This probably goes without saying but migrations should be run multiple times: locally, staging, preproduction (if available), before it's ever run on production. There will inevitably be issues that need to be fixed, so the more the migration process is tested, the more likely these issues are found and fixed before it's run on production. It's always better to write and test iteratively, so any potential issues can be found and fixed sooner.
+	This probably goes without saying but migrations should be run multiple times: locally, staging, client's staging (if available), before it's ever run on production. There will inevitably be issues that need to be fixed, so the more the migration process is tested, the more likely these issues are found and fixed before it's run on production. It's always better to write and test iteratively, so any potential issues can be found and fixed sooner.
 
-	 * In the same vein as this, make sure all scripts are code reviewed before running on stage/preprod/prod.
+	 * In the same vein as this, make sure all scripts are code reviewed before running on staging/production.
 
 * *Review data*
 
@@ -57,6 +84,10 @@ The following are some general things to keep in mind when doing these migration
 
 	We always need to make sure authors are brought over and assigned correctly. When creating authors, only create them once, so we don't end up with duplicate authors. Once an author has been brought over the first time, check for and re-use that author each time we need it in the future. Some platforms have the ability to set multiple authors on a post, so make sure there's a solution figured out for that if needed.
 
+* *Logs*
+
+	While executing migration script, we recommend keeping error logs of data at frequent steps, so that any missing data/condition becomes easy to investigate and fix.
+
 ## Potential Side Effects
 
 Even the most carefully planned migration can have issues. The following are some things that might occur if they're not planned for and tested.
@@ -72,6 +103,8 @@ Even the most carefully planned migration can have issues. The following are som
 * *Social*
 
 	One thing to make sure of when running migrations is to not trigger any social services that might be set up. This includes sending posts to Facebook, Twitter or email. We don't want to spam subscribers with hundreds, if not thousands of items all in a row, as those items are migrated in. There are multiple ways to prevent this from happening and will depend heavily on how the site is set up (i.e. how these social services are powered). Make sure as part of the migration plan you account for this.
+
+	As the sites generally have email triggers setup for user registrations, placed orders, you can use plugins like [Stop Emails](https://wordpress.org/plugins/stop-emails/) to avoid emails getting sent during migration.
 
 * *Time*
 
@@ -95,7 +128,7 @@ Even the most carefully planned migration can have issues. The following are som
 
 * __Free up memory.__
 
-	During migration script execution, make sure to periodically free up memory. A typical function used at WisdmLabs is:
+	During migration script execution, make sure to periodically free up memory. A typical function that can be used is:
 
 ```php
 <?php
